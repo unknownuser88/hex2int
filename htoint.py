@@ -2,39 +2,33 @@ import sublime, sublime_plugin, re
 
 class HtointCommand(sublime_plugin.EventListener):
 	def on_new(self, view):
-		self.view = view
-		self.run()
-
-	def on_close(self, view):
-		self.view.erase_status('Hexcode')
+		self.run(view)
 
 	def on_selection_modified(self, view):
-		self.view = view
-		self.run()
+		self.run(view)
 
 	def on_activated(self, view):
-		self.view = view
-		self.run()
+		self.run(view)
 
-	def run(self):
+	def run(self, view):
 		statusline = []
-		for region in self.view.sel():
+		for region in view.sel():
+			
 			if region.begin() == region.end():
-				word = self.view.word(region)
+				word = view.word(region)
 			else:
 				word = region
+
 			if not word.empty():
-				keyword = self.view.substr(word)
+
+				keyword = view.substr(word)
 				isHex = re.findall(r'0x[0-9a-fA-F]+', keyword)
-				# print(isHex)
+
 				if isHex:
 					statusline.append('{} -> {}'.format(isHex[0], self.str_to_int(isHex[0])))
-				else:
-					self.view.erase_status('Hexcode')
-			else:
-				self.view.erase_status('Hexcode')
-		# print(", ".join(statusline))
-		self.view.set_status('Hexcode', '{}'.format(", ".join(statusline)))
+
+		view.erase_status('Hexcode')
+		view.set_status('Hexcode', '{}'.format(", ".join(statusline)))
 
 	def str_to_int(self, s):
 		i = int(s, 16)
